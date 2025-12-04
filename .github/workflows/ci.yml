@@ -50,20 +50,9 @@ jobs:
       - name: Generate HTML coverage report
         run: coverage html
 
-      - name: Prepare site folder
+      - name: Prepare local reports folder
         run: |
           mkdir -p site
           mv report.html site/
           mv htmlcov site/coverage
-
-      - name: Print report URLs
-        run: |
-          echo "Test Report:"
-          echo "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/report.html"
-          echo "Coverage Report:"
-          echo "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/coverage/index.html"
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./site
+          echo "Reports generated locally in ./site; no Pages deployment configured."
