@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run basic tests
+        run: pytest -q
+
+      - name: Run tests with coverage and HTML report
+        run: |
+          pytest -q \
+            --cov=src \
+            --cov-report=term \
+            --cov-report=xml \
+            --html=report.html \
+            --self-contained-html
+
+      - name: Generate HTML coverage report
+        run: coverage html
+
+      - name: Prepare site folder
+        run: |
+          mkdir -p site
+          mv report.html site/
+          mv htmlcov site/coverage
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v4
+
+      - name: Print report URLs
+        run: |
+          echo "Test Report:"
+          echo "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/report.html"
+          echo "Coverage Report:"
+          echo "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/coverage/index.html"
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./site
+
+
+  deploy:
+    needs: run-tests
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
