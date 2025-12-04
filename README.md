@@ -1,6 +1,6 @@
 # cicd_demo
 
-Small Python demo used for the CS4090 CI/CD exercise. It implements helpers in `src/app.py` and validates them with `pytest` in `tests/test_app.py`.
+Small Python demo used for the CS4090 CI/CD exercise. It implements helpers in `src/cs4090_cicd_demo/app.py` and validates them with `pytest` in `tests/test_app.py`.
 
 ## Run locally
 ```
