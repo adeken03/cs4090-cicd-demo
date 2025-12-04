@@ -56,12 +56,6 @@ jobs:
           mv report.html site/
           mv htmlcov site/coverage
 
-      - name: Configure Pages
-        if: github.event_name == 'push'
-        uses: actions/configure-pages@v4
-        with:
-          enablement: true
-
       - name: Print report URLs
         run: |
           echo "Test Report:"
