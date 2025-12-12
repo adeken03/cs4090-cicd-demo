@@ -1,14 +1,17 @@
-name: CI
+name: CD
 
 on:
-  push:
-    branches: [ development ]
   pull_request:
-    branches: [ development ]
+    types: [ closed ]
+    branches: [ main, master ]
 
 jobs:
-  run-tests:
+  deploy:
+    if: github.event.pull_request.merged == true && github.event.pull_request.head.ref == 'development'
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
 
     steps:
       - name: Checkout code
@@ -35,10 +38,17 @@ jobs:
             --cov-report=xml \
             --cov-report=html
 
-      - name: Upload coverage artifacts
-        uses: actions/upload-artifact@v4
+      - name: Prepare the webpage
+        run: |
+          mkdir sites
+          mv htmlcov sites/
+          mv coverage.xml sites/
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
         with:
-          name: coverage-report
-          path: |
-            htmlcov
-            coverage.xml
+          path: ./sites
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
+
